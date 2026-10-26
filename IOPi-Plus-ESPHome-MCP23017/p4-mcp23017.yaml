@@ -1,0 +1,195 @@
+substitutions:
+  name: "p4-mcp23017"
+  friendly_name: "P4 MCP23017 IO"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: esp32-p4-evboard
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+web_server:
+  port: 80
+  version: 3
+  log: true
+# ESP32-C6 coprocessor provides Wi-Fi on the P4 (pins for P4 EV board / Waveshare P4-Nano)
+esp32_hosted:
+  variant: ESP32C6
+  active_high: true
+  reset_pin: GPIO54
+  cmd_pin: GPIO19
+  clk_pin: GPIO18
+  d0_pin: GPIO14
+  d1_pin: GPIO15
+  d2_pin: GPIO16
+  d3_pin: GPIO17
+
+logger:
+  level: DEBUG
+  hardware_uart: UART0
+
+# Keep the api encryption key / ota password the Device Builder generated for you
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: yourssid
+  password: yourpassword
+
+# I2C bus - change sda/scl to whichever header pins you've wired the board to
+i2c:
+  sda: GPIO7
+  scl: GPIO8
+  frequency: 400kHz
+  scan: true
+
+mcp23017:
+  - id: mcp_in        # chip 1 - inputs
+    address: 0x20
+  - id: mcp_out       # chip 2 - outputs
+    address: 0x21
+
+# ---------------------------------------------------------------
+# INPUTS - MCP23017 @ 0x20
+# Pins 0-7 = GPA0-GPA7, pins 8-15 = GPB0-GPB7
+# Internal pull-ups enabled; inverted so grounding a pin = ON
+# ---------------------------------------------------------------
+binary_sensor:
+  - platform: gpio
+    name: "Input 1"
+    pin: { mcp23xxx: mcp_in, number: 0, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 1 (0x20 GPA0) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 2"
+    pin: { mcp23xxx: mcp_in, number: 1, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 2 (0x20 GPA1) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 3"
+    pin: { mcp23xxx: mcp_in, number: 2, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 3 (0x20 GPA2) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 4"
+    pin: { mcp23xxx: mcp_in, number: 3, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 4 (0x20 GPA3) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 5"
+    pin: { mcp23xxx: mcp_in, number: 4, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 5 (0x20 GPA4) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 6"
+    pin: { mcp23xxx: mcp_in, number: 5, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 6 (0x20 GPA5) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 7"
+    pin: { mcp23xxx: mcp_in, number: 6, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 7 (0x20 GPA6) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 8"
+    pin: { mcp23xxx: mcp_in, number: 7, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 8 (0x20 GPA7) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 9"
+    pin: { mcp23xxx: mcp_in, number: 8, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 9 (0x20 GPB0) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 10"
+    pin: { mcp23xxx: mcp_in, number: 9, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 10 (0x20 GPB1) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 11"
+    pin: { mcp23xxx: mcp_in, number: 10, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 11 (0x20 GPB2) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 12"
+    pin: { mcp23xxx: mcp_in, number: 11, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 12 (0x20 GPB3) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 13"
+    pin: { mcp23xxx: mcp_in, number: 12, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 13 (0x20 GPB4) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 14"
+    pin: { mcp23xxx: mcp_in, number: 13, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 14 (0x20 GPB5) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 15"
+    pin: { mcp23xxx: mcp_in, number: 14, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 15 (0x20 GPB6) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+  - platform: gpio
+    name: "Input 16"
+    pin: { mcp23xxx: mcp_in, number: 15, mode: { input: true, pullup: true }, inverted: true }
+    filters: [ delayed_on_off: 20ms ]
+    on_state:
+      - logger.log: { format: "Input 16 (0x20 GPB7) = %s", args: [ 'x ? "ON" : "OFF"' ], level: INFO }
+
+# ---------------------------------------------------------------
+# OUTPUTS - MCP23017 @ 0x21
+# Exposed as switches (toggle from the web UI / Home Assistant)
+# ---------------------------------------------------------------
+switch:
+  - { platform: gpio, name: "Output 1",  restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 0,  mode: { output: true } } }
+  - { platform: gpio, name: "Output 2",  restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 1,  mode: { output: true } } }
+  - { platform: gpio, name: "Output 3",  restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 2,  mode: { output: true } } }
+  - { platform: gpio, name: "Output 4",  restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 3,  mode: { output: true } } }
+  - { platform: gpio, name: "Output 5",  restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 4,  mode: { output: true } } }
+  - { platform: gpio, name: "Output 6",  restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 5,  mode: { output: true } } }
+  - { platform: gpio, name: "Output 7",  restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 6,  mode: { output: true } } }
+  - { platform: gpio, name: "Output 8",  restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 7,  mode: { output: true } } }
+  - { platform: gpio, name: "Output 9",  restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 8,  mode: { output: true } } }
+  - { platform: gpio, name: "Output 10", restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 9,  mode: { output: true } } }
+  - { platform: gpio, name: "Output 11", restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 10, mode: { output: true } } }
+  - { platform: gpio, name: "Output 12", restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 11, mode: { output: true } } }
+  - { platform: gpio, name: "Output 13", restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 12, mode: { output: true } } }
+  - { platform: gpio, name: "Output 14", restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 13, mode: { output: true } } }
+  - { platform: gpio, name: "Output 15", restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 14, mode: { output: true } } }
+  - { platform: gpio, name: "Output 16", restore_mode: ALWAYS_OFF, pin: { mcp23xxx: mcp_out, number: 15, mode: { output: true } } }

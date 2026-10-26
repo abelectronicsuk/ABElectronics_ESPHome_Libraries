@@ -1,0 +1,187 @@
+substitutions:
+  name: "p4-pca9685-pwm"
+  friendly_name: "P4 PCA9685 PWM Demo"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: esp32-p4-evboard
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+
+# ESP32-C6 coprocessor provides Wi-Fi on the P4 (pins for P4 EV board / Waveshare P4-Nano)
+esp32_hosted:
+  variant: ESP32C6
+  active_high: true
+  reset_pin: GPIO54
+  cmd_pin: GPIO19
+  clk_pin: GPIO18
+  d0_pin: GPIO14
+  d1_pin: GPIO15
+  d2_pin: GPIO16
+  d3_pin: GPIO17
+
+logger:
+  level: DEBUG
+  hardware_uart: UART0
+
+# Keep the api encryption key / ota password the Device Builder generated for you
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+web_server:
+  port: 80
+  version: 3
+  log: true
+
+# I2C bus - change sda/scl to whichever header pins you've wired the board to
+i2c:
+  sda: GPIO7
+  scl: GPIO8
+  frequency: 400kHz
+  scan: true
+
+# ---------------------------------------------------------------
+# PCA9685 hub
+# One PWM frequency for all 16 channels:
+#   ~1000 Hz for LEDs (flicker-free), 50 Hz for hobby servos
+# ---------------------------------------------------------------
+pca9685:
+  - id: pwm_hub
+    address: 0x40
+    frequency: 1000
+
+# Optional: drive the board's OE (output enable, active low) pin from the P4.
+# Delete this block if OE is tied to GND on your board.
+# output:
+#   - platform: gpio
+#     id: pca_oe
+#     pin: { number: GPIO6, inverted: true }
+
+# ---------------------------------------------------------------
+# 16 PWM channels as float outputs
+# ---------------------------------------------------------------
+output:
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_0,  channel: 0 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_1,  channel: 1 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_2,  channel: 2 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_3,  channel: 3 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_4,  channel: 4 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_5,  channel: 5 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_6,  channel: 6 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_7,  channel: 7 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_8,  channel: 8 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_9,  channel: 9 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_10, channel: 10 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_11, channel: 11 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_12, channel: 12 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_13, channel: 13 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_14, channel: 14 }
+  - { platform: pca9685, pca9685_id: pwm_hub, id: pwm_15, channel: 15 }
+
+# ---------------------------------------------------------------
+# Each channel as a dimmable light (brightness slider in the web UI)
+# ---------------------------------------------------------------
+light:
+  - { platform: monochromatic, name: "PWM 0",  id: led_0,  output: pwm_0,  default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 1",  id: led_1,  output: pwm_1,  default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 2",  id: led_2,  output: pwm_2,  default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 3",  id: led_3,  output: pwm_3,  default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 4",  id: led_4,  output: pwm_4,  default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 5",  id: led_5,  output: pwm_5,  default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 6",  id: led_6,  output: pwm_6,  default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 7",  id: led_7,  output: pwm_7,  default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 8",  id: led_8,  output: pwm_8,  default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 9",  id: led_9,  output: pwm_9,  default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 10", id: led_10, output: pwm_10, default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 11", id: led_11, output: pwm_11, default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 12", id: led_12, output: pwm_12, default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 13", id: led_13, output: pwm_13, default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 14", id: led_14, output: pwm_14, default_transition_length: 0.5s }
+  - { platform: monochromatic, name: "PWM 15", id: led_15, output: pwm_15, default_transition_length: 0.5s }
+
+# ---------------------------------------------------------------
+# Demo: a "chase" that fades each channel up and down in turn.
+# Start/stop it from the "Chase Demo" switch in the web UI.
+# ---------------------------------------------------------------
+globals:
+  - id: chase_ch
+    type: int
+    initial_value: '0'
+
+switch:
+  - platform: template
+    name: "Chase Demo"
+    id: chase_enabled
+    optimistic: true
+    restore_mode: ALWAYS_OFF
+    turn_off_action:
+      - lambda: |-
+          // turn every channel off when the demo stops
+          for (auto *l : App.get_lights()) {
+            auto call = l->turn_off();
+            call.set_transition_length(300);
+            call.perform();
+          }
+
+interval:
+  - interval: 150ms
+    then:
+      - if:
+          condition:
+            switch.is_on: chase_enabled
+          then:
+            - lambda: |-
+                static light::LightState *leds[16] = {
+                  id(led_0), id(led_1), id(led_2), id(led_3),
+                  id(led_4), id(led_5), id(led_6), id(led_7),
+                  id(led_8), id(led_9), id(led_10), id(led_11),
+                  id(led_12), id(led_13), id(led_14), id(led_15)
+                };
+                int cur = id(chase_ch);
+                int prev = (cur + 15) % 16;
+
+                auto off = leds[prev]->turn_off();
+                off.set_transition_length(400);
+                off.perform();
+
+                auto on = leds[cur]->turn_on();
+                on.set_brightness(1.0);
+                on.set_transition_length(100);
+                on.perform();
+
+                ESP_LOGI("pwm", "Chase: channel %d on", cur);
+                id(chase_ch) = (cur + 1) % 16;
+
+# ---------------------------------------------------------------
+# SERVOS instead of LEDs?
+# Set pca9685 frequency: 50 above, then use channels like this
+# (and remove those channels from the light: list):
+# ---------------------------------------------------------------
+# servo:
+#   - id: servo_0
+#     output: pwm_0
+#     min_level: 2.5%    # ~0.5 ms pulse at 50 Hz
+#     idle_level: 7.5%   # ~1.5 ms (centre)
+#     max_level: 12.5%   # ~2.5 ms
+#
+# number:
+#   - platform: template
+#     name: "Servo 0 Position"
+#     min_value: -100
+#     max_value: 100
+#     step: 1
+#     optimistic: true
+#     set_action:
+#       - servo.write:
+#           id: servo_0
+#           level: !lambda 'return x / 100.0;'

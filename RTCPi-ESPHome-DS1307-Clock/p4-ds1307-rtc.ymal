@@ -1,0 +1,108 @@
+substitutions:
+  name: "p4-ds1307-rtc"
+  friendly_name: "P4 DS1307 RTC Demo"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  on_boot:
+    # Runs early, before Wi-Fi is up: load the system clock from the RTC
+    # so the device has the correct time even with no network
+    priority: 600
+    then:
+      - ds1307.read_time:
+          id: rtc_time
+      - logger.log:
+          format: "Boot: system clock loaded from DS1307"
+          level: INFO
+
+esp32:
+  board: esp32-p4-evboard
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+
+# ESP32-C6 coprocessor provides Wi-Fi on the P4 (pins for P4 EV board / Waveshare P4-Nano)
+esp32_hosted:
+  variant: ESP32C6
+  active_high: true
+  reset_pin: GPIO54
+  cmd_pin: GPIO19
+  clk_pin: GPIO18
+  d0_pin: GPIO14
+  d1_pin: GPIO15
+  d2_pin: GPIO16
+  d3_pin: GPIO17
+
+logger:
+  level: DEBUG
+  hardware_uart: UART0
+
+# Keep the api encryption key / ota password the Device Builder generated for you
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+web_server:
+  port: 80
+  version: 3
+  log: true
+
+# I2C bus - change sda/scl to whichever header pins you've wired the RTC to
+i2c:
+  sda: GPIO7
+  scl: GPIO8
+  frequency: 100kHz   # DS1307 is a 100kHz-only device
+  scan: true
+
+time:
+  # The DS1307 chip (fixed I2C address 0x68)
+  - platform: ds1307
+    id: rtc_time
+    timezone: Europe/London
+    update_interval: never   # we read it ourselves every second below
+
+  # Network time - when it syncs, write the time into the DS1307
+  - platform: sntp
+    id: sntp_time
+    timezone: Europe/London
+    servers:
+      - 0.pool.ntp.org
+      - 1.pool.ntp.org
+      - 2.pool.ntp.org
+    on_time_sync:
+      then:
+        - ds1307.write_time:
+            id: rtc_time
+        - logger.log:
+            format: "NTP sync complete - DS1307 updated from network time"
+            level: INFO
+
+# Every second: read the DS1307 over I2C and log what the chip says
+interval:
+  - interval: 1s
+    then:
+      - ds1307.read_time:
+          id: rtc_time
+      - lambda: |-
+          auto t = id(rtc_time).now();
+          if (t.is_valid()) {
+            ESP_LOGI("rtc", "DS1307 time: %s", t.strftime("%Y-%m-%d %H:%M:%S %Z").c_str());
+          } else {
+            ESP_LOGW("rtc", "DS1307 time not valid yet (chip not set or no battery?)");
+          }
+
+# Optional: show the RTC time on the web UI / Home Assistant
+text_sensor:
+  - platform: template
+    name: "DS1307 Time"
+    update_interval: 1s
+    lambda: |-
+      auto t = id(rtc_time).now();
+      if (!t.is_valid()) return {"not set"};
+      return t.strftime("%Y-%m-%d %H:%M:%S");

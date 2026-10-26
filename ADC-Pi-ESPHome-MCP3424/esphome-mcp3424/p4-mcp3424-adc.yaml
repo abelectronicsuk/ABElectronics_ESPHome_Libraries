@@ -1,0 +1,162 @@
+substitutions:
+  name: "p4-mcp3424-adc"
+  friendly_name: "P4 MCP3424 ADC"
+  # Input divider: 10k in series, 6k8 to ground -> (10 + 6.8) / 6.8
+  # Full-scale input = 2.048 V x 2.470588 = 5.06 V
+  divider_ratio: "2.470588"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: esp32-p4-evboard
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+
+# ESP32-C6 co-processor provides Wi-Fi (ESP32-P4-Module-DEV-KIT)
+esp32_hosted:
+  variant: ESP32C6
+  active_high: true
+  reset_pin: GPIO54
+  cmd_pin: GPIO19
+  clk_pin: GPIO18
+  d0_pin: GPIO14
+  d1_pin: GPIO15
+  d2_pin: GPIO16
+  d3_pin: GPIO17
+
+logger:
+  level: DEBUG
+  hardware_uart: UART0
+
+# Keep the api encryption key / ota password the Device Builder generated for you
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+web_server:
+  port: 80
+  version: 3
+  log: true
+
+i2c:
+  sda: GPIO7
+  scl: GPIO8
+  frequency: 400kHz
+  scan: true
+
+# The MCP3424 component lives in the "components" folder next to this file
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [ mcp3424 ]
+
+# ---------------------------------------------------------------
+# MCP3424 chips. Address range is 0x68-0x6F, set by the Adr0/Adr1 pins.
+# Note: 0x68 is also the DS1307 address, so an RTC on the same bus
+# needs the MCP3424 moved to another address.
+# update_interval must be longer than all channels take to convert:
+# 18-bit is about 270 ms per channel, so 4 channels need over 1.1 s.
+# ---------------------------------------------------------------
+mcp3424:
+  - id: adc_1
+    address: 0x68
+    update_interval: 5s
+  - id: adc_2
+    address: 0x69
+    update_interval: 5s
+
+# ---------------------------------------------------------------
+# Channels
+#   channel:    1-4
+#   resolution: 12, 14, 16 or 18 bits (default 18)
+#   gain:       1, 2, 4 or 8 (default 1)
+# Single-ended inputs through a 10k / 6k8 divider (0 - 5.06 V).
+# The component reports the voltage at the chip pin; the multiply
+# filter scales it back to the input voltage, and clamp removes small
+# negative noise readings at 0 V.
+# With the divider, gain 2 / 4 / 8 limits the input range to
+# 2.53 V / 1.26 V / 0.63 V.
+# ---------------------------------------------------------------
+sensor:
+  - platform: mcp3424
+    mcp3424_id: adc_1
+    name: "ADC Channel 1"
+    channel: 1
+    resolution: 18
+    gain: 1
+    filters:
+      - multiply: ${divider_ratio}
+      - clamp:
+          min_value: 0
+
+  - platform: mcp3424
+    mcp3424_id: adc_1
+    name: "ADC Channel 2"
+    channel: 2
+    filters:
+      - multiply: ${divider_ratio}
+      - clamp:
+          min_value: 0
+
+  - platform: mcp3424
+    mcp3424_id: adc_1
+    name: "ADC Channel 3"
+    channel: 3
+    filters:
+      - multiply: ${divider_ratio}
+      - clamp:
+          min_value: 0
+
+  - platform: mcp3424
+    mcp3424_id: adc_1
+    name: "ADC Channel 4"
+    channel: 4
+    filters:
+      - multiply: ${divider_ratio}
+      - clamp:
+          min_value: 0
+
+  - platform: mcp3424
+    mcp3424_id: adc_2
+    name: "ADC Channel 5"
+    channel: 1
+    filters:
+      - multiply: ${divider_ratio}
+      - clamp:
+          min_value: 0
+
+  - platform: mcp3424
+    mcp3424_id: adc_2
+    name: "ADC Channel 6"
+    channel: 2
+    filters:
+      - multiply: ${divider_ratio}
+      - clamp:
+          min_value: 0
+
+  - platform: mcp3424
+    mcp3424_id: adc_2
+    name: "ADC Channel 7"
+    channel: 3
+    filters:
+      - multiply: ${divider_ratio}
+      - clamp:
+          min_value: 0
+
+  - platform: mcp3424
+    mcp3424_id: adc_2
+    name: "ADC Channel 8"
+    channel: 4
+    filters:
+      - multiply: ${divider_ratio}
+      - clamp:
+          min_value: 0
